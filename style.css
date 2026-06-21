@@ -2,7 +2,7 @@
    詩集 · style.css — mobile-first
    ============================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
 /* ─── TOKENS ─── */
 :root {
@@ -29,10 +29,8 @@
   --shadow-sheet:0 -8px 40px rgba(30,20,10,0.15);
   --ruled:       rgba(180,160,130,0.16);
 
-  --font-ja:  'Zen Maru Gothic', sans-serif;
-  --font-vi:  'Space Mono', monospace;
-  --font-zh:  'Noto Sans SC', sans-serif;
-  --font-f:   var(--font-ja);
+  --font-ja:   'Zen Maru Gothic', sans-serif;
+  --font-mono: 'Space Mono', monospace;
 
   --r-card:  14px;
   --r-input: 12px;
@@ -56,11 +54,6 @@
   --shadow-sheet:0 -8px 50px rgba(0,0,0,0.55);
   --ruled:       rgba(255,255,255,0.04);
 }
-
-/* Content font: selected lang font first, Zen Maru always as CJK fallback */
-[data-lang="vi"] { --font-f: 'Space Mono', 'Zen Maru Gothic', sans-serif; }
-[data-lang="zh"] { --font-f: 'Noto Sans SC', 'Zen Maru Gothic', sans-serif; }
-[data-lang="ja"] { --font-f: 'Zen Maru Gothic', sans-serif; }
 
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -121,28 +114,6 @@ body {
   font-family: var(--font-ja);
 }
 
-/* ─── LANG SELECTOR ─── */
-.lang-selector {
-  display: flex;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  overflow: hidden;
-}
-
-.lang-btn {
-  padding: 5px 10px;
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.05em;
-  background: none; border: none;
-  color: var(--text-3);
-  cursor: pointer;
-  transition: all var(--ease);
-  font-family: var(--font-ja);
-  -webkit-tap-highlight-color: transparent;
-}
-.lang-btn.active { background: var(--accent); color: #fff; }
-
 /* ─── ICON BUTTON ─── */
 .icon-btn {
   width: 36px; height: 36px;
@@ -190,9 +161,9 @@ body {
 .search-bar input {
   flex: 1; background: none; border: none; outline: none;
   font-size: 15px; color: var(--text);
-  font-family: var(--font-ja);
+  font-family: var(--font-mono);
 }
-.search-bar input::placeholder { color: var(--text-3); }
+.search-bar input::placeholder { color: var(--text-3); font-family: var(--font-ja); }
 .entry-count {
   font-size: 11px; color: var(--text-3);
   font-family: var(--font-ja);
@@ -267,19 +238,19 @@ body {
 .card-title {
   font-size: 15px; font-weight: 700;
   line-height: 1.35;
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .card-artist {
   font-size: 12px; color: var(--accent); font-weight: 500;
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .card-preview {
   font-size: 12.5px; color: var(--text-2); line-height: 1.7;
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   white-space: pre-wrap;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -425,7 +396,7 @@ body {
   padding: 12px 14px;
   font-size: 15px;
   color: var(--text);
-  font-family: var(--font-ja);
+  font-family: var(--font-mono);
   outline: none;
   transition: border-color var(--ease), box-shadow var(--ease);
   resize: none;
@@ -433,19 +404,13 @@ body {
   -webkit-appearance: none;
 }
 
-/* Only the lyrics textarea uses the selected language font */
-.field-textarea { font-family: var(--font-f); }
-
-/* Title & artist inputs follow the selected language font too */
-#entryTitle,
-#entryArtist { font-family: var(--font-f); }
 .field-input:focus,
 .field-textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 .field-input::placeholder,
-.field-textarea::placeholder { color: var(--text-3); }
+.field-textarea::placeholder { color: var(--text-3); font-family: var(--font-ja); }
 
 .field-textarea {
   min-height: 220px;
@@ -457,18 +422,18 @@ body {
 .view-header-info { flex: 1; min-width: 0; }
 .view-title {
   font-size: 18px; font-weight: 700;
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   line-height: 1.3;
   word-break: break-word;
 }
 .view-meta {
   margin-top: 3px; font-size: 12px;
-  color: var(--text-3); font-family: var(--font-f);
+  color: var(--text-3); font-family: var(--font-ja);
 }
 .view-hdr-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
 .view-lyrics {
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   font-size: 15px; line-height: 2;
   white-space: pre-wrap;
   color: var(--text);
