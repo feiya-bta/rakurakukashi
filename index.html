@@ -10,11 +10,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
 
-  <!-- HEADER -->
   <header class="app-header">
     <div class="header-left">
       <div class="logo-mark">詩</div>
@@ -25,7 +25,6 @@
     </div>
     <nav class="header-controls">
       <button class="icon-btn theme-toggle" aria-label="テーマ切替">
-        <!-- Sun icon -->
         <svg class="ico ico-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
           <circle cx="10" cy="10" r="3.5"/>
           <line x1="10" y1="1.5" x2="10" y2="3.5"/>
@@ -37,7 +36,6 @@
           <line x1="3.9" y1="16.1" x2="5.3" y2="14.7"/>
           <line x1="14.7" y1="5.3" x2="16.1" y2="3.9"/>
         </svg>
-        <!-- Moon icon -->
         <svg class="ico ico-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <path d="M16.5 11.5A7 7 0 0 1 8.5 3.5a7 7 0 1 0 8 8z"/>
         </svg>
@@ -45,7 +43,6 @@
     </nav>
   </header>
 
-  <!-- SEARCH -->
   <div class="search-wrap">
     <div class="search-bar">
       <svg class="search-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
@@ -57,7 +54,6 @@
     </div>
   </div>
 
-  <!-- CARD LIST -->
   <main class="lyric-list" id="lyricGrid">
     <div class="empty-state" id="emptyState">
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="empty-svg">
@@ -71,7 +67,6 @@
     </div>
   </main>
 
-  <!-- FAB -->
   <button class="fab" id="openAddModal" aria-label="追加">
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
       <line x1="10" y1="3" x2="10" y2="17"/>
@@ -79,7 +74,6 @@
     </svg>
   </button>
 
-  <!-- ── FORM BOTTOM SHEET ── -->
   <div class="sheet-overlay" id="formModal" role="dialog" aria-modal="true">
     <div class="bottom-sheet" id="formSheet">
       <div class="sheet-handle"></div>
@@ -118,7 +112,6 @@
     </div>
   </div>
 
-  <!-- ── VIEW BOTTOM SHEET ── -->
   <div class="sheet-overlay" id="viewModal" role="dialog" aria-modal="true">
     <div class="bottom-sheet bottom-sheet--view" id="viewSheet">
       <div class="sheet-handle"></div>
@@ -156,7 +149,6 @@
     </div>
   </div>
 
-  <!-- ── CONFIRM SHEET ── -->
   <div class="sheet-overlay" id="confirmModal" role="dialog" aria-modal="true">
     <div class="bottom-sheet bottom-sheet--confirm">
       <div class="sheet-handle"></div>
@@ -169,9 +161,8 @@
     </div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
