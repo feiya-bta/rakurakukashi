@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light" data-lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>詩集</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-mark">詩</div>
+      <div class="header-titles">
+        <h1 class="app-title">詩集</h1>
+        <p class="app-subtitle">My Lyric Book</p>
+      </div>
+    </div>
+    <nav class="header-controls">
+      <div class="lang-selector">
+        <button class="lang-btn active" data-lang="ja">JP</button>
+        <button class="lang-btn" data-lang="vi">VI</button>
+        <button class="lang-btn" data-lang="zh">ZH</button>
+      </div>
+      <button class="icon-btn theme-toggle" aria-label="テーマ切替">
+        <!-- Sun icon -->
+        <svg class="ico ico-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="10" cy="10" r="3.5"/>
+          <line x1="10" y1="1.5" x2="10" y2="3.5"/>
+          <line x1="10" y1="16.5" x2="10" y2="18.5"/>
+          <line x1="1.5" y1="10" x2="3.5" y2="10"/>
+          <line x1="16.5" y1="10" x2="18.5" y2="10"/>
+          <line x1="3.9" y1="3.9" x2="5.3" y2="5.3"/>
+          <line x1="14.7" y1="14.7" x2="16.1" y2="16.1"/>
+          <line x1="3.9" y1="16.1" x2="5.3" y2="14.7"/>
+          <line x1="14.7" y1="5.3" x2="16.1" y2="3.9"/>
+        </svg>
+        <!-- Moon icon -->
+        <svg class="ico ico-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16.5 11.5A7 7 0 0 1 8.5 3.5a7 7 0 1 0 8 8z"/>
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <div class="search-bar">
+      <svg class="search-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <circle cx="9" cy="9" r="5.5"/>
+        <line x1="13.5" y1="13.5" x2="17" y2="17"/>
+      </svg>
+      <input type="search" id="searchInput" placeholder="曲名・歌詞を検索…" autocomplete="off" />
+      <span class="entry-count" id="entryCount">0 曲</span>
+    </div>
+  </div>
+
+  <!-- CARD LIST -->
+  <main class="lyric-list" id="lyricGrid">
+    <div class="empty-state" id="emptyState">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="empty-svg">
+        <rect x="8" y="6" width="32" height="36" rx="3"/>
+        <line x1="14" y1="16" x2="34" y2="16"/>
+        <line x1="14" y1="22" x2="34" y2="22"/>
+        <line x1="14" y1="28" x2="26" y2="28"/>
+      </svg>
+      <p class="empty-title">まだ歌詞がありません</p>
+      <p class="empty-sub">右下の ＋ から最初の一曲を追加しよう</p>
+    </div>
+  </main>
+
+  <!-- FAB -->
+  <button class="fab" id="openAddModal" aria-label="追加">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="10" y1="3" x2="10" y2="17"/>
+      <line x1="3" y1="10" x2="17" y2="10"/>
+    </svg>
+  </button>
+
+  <!-- ── FORM BOTTOM SHEET ── -->
+  <div class="sheet-overlay" id="formModal" role="dialog" aria-modal="true">
+    <div class="bottom-sheet" id="formSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2 class="sheet-title" id="modalTitle">歌詞を追加</h2>
+        <button class="icon-btn sheet-close" id="closeFormModal" aria-label="閉じる">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <line x1="5" y1="5" x2="15" y2="15"/>
+            <line x1="15" y1="5" x2="5" y2="15"/>
+          </svg>
+        </button>
+      </div>
+      <div class="sheet-body">
+        <input type="hidden" id="entryId" />
+        <div class="field-group">
+          <label class="field-label" for="entryTitle">曲名 <span class="req">*</span></label>
+          <input class="field-input" type="text" id="entryTitle" placeholder="例：さよなら" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="entryArtist">アーティスト</label>
+          <input class="field-input" type="text" id="entryArtist" placeholder="例：椎名林檎" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="entryDate">日付</label>
+          <input class="field-input" type="date" id="entryDate" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="entryLyrics">歌詞</label>
+          <textarea class="field-textarea" id="entryLyrics" placeholder="ここに歌詞を貼り付けてください…"></textarea>
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn--ghost" id="cancelFormBtn">キャンセル</button>
+        <button class="btn btn--primary" id="saveEntryBtn">保存する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── VIEW BOTTOM SHEET ── -->
+  <div class="sheet-overlay" id="viewModal" role="dialog" aria-modal="true">
+    <div class="bottom-sheet bottom-sheet--view" id="viewSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="view-header-info">
+          <h2 class="view-title" id="viewTitle"></h2>
+          <p class="view-meta" id="viewMeta"></p>
+        </div>
+        <div class="view-hdr-actions">
+          <button class="icon-btn" id="editFromView" aria-label="編集">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 3l3 3L7 16H4v-3L14 3z"/>
+            </svg>
+          </button>
+          <button class="icon-btn icon-btn--danger" id="deleteFromView" aria-label="削除">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="5" x2="17" y2="5"/>
+              <path d="M8 5V3h4v2"/>
+              <path d="M5 5l1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/>
+              <line x1="8" y1="9" x2="8" y2="14"/>
+              <line x1="12" y1="9" x2="12" y2="14"/>
+            </svg>
+          </button>
+          <button class="icon-btn sheet-close" id="closeViewModal" aria-label="閉じる">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <line x1="5" y1="5" x2="15" y2="15"/>
+              <line x1="15" y1="5" x2="5" y2="15"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="sheet-body">
+        <pre class="view-lyrics" id="viewLyrics"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONFIRM SHEET ── -->
+  <div class="sheet-overlay" id="confirmModal" role="dialog" aria-modal="true">
+    <div class="bottom-sheet bottom-sheet--confirm">
+      <div class="sheet-handle"></div>
+      <div class="confirm-body">
+        <p class="confirm-title">この歌詞を削除しますか？</p>
+        <p class="confirm-sub" id="confirmSub"></p>
+        <button class="btn btn--danger btn--full" id="confirmDeleteBtn">削除する</button>
+        <button class="btn btn--ghost btn--full" id="cancelDeleteBtn">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
