@@ -5,7 +5,6 @@
 
 const STORAGE_KEY = 'shishu_lyricbook_v1';
 const THEME_KEY   = 'shishu_theme';
-const LANG_KEY    = 'shishu_lang';
 
 /* ─── STORAGE ─── */
 const loadEntries = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } };
@@ -36,20 +35,6 @@ applyTheme(localStorage.getItem(THEME_KEY) || (matchMedia('(prefers-color-scheme
 document.querySelector('.theme-toggle').addEventListener('click', () =>
   applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
 
-/* ─── LANGUAGE ─── */
-const currentLang = () => html.getAttribute('data-lang');
-const applyLang = (l) => {
-  html.setAttribute('data-lang', l);
-  localStorage.setItem(LANG_KEY, l);
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
-};
-applyLang(localStorage.getItem(LANG_KEY) || 'ja');
-document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => {
-  applyLang(b.dataset.lang);
-  searchInput.value = '';
-  renderGrid();
-}));
-
 /* ─── TOAST ─── */
 const toast = $('toast');
 let toastT;
@@ -68,13 +53,10 @@ const fmtDate   = (iso) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString(
 const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 /* ─── RENDER ─── */
-const getLangEntries = () => entries.filter(e => (e.lang || 'ja') === currentLang());
-
 function renderGrid(list) {
   lyricGrid.querySelectorAll('.lyric-card').forEach(el => el.remove());
-  const langEntries = getLangEntries();
-  const show = list ?? langEntries;
-  entryCountEl.textContent = `${langEntries.length} 曲`;
+  const show = list ?? entries;
+  entryCountEl.textContent = `${entries.length} 曲`;
   emptyState.style.display = show.length === 0 ? 'flex' : 'none';
 
   [...show].sort((a, b) => b.createdAt - a.createdAt).forEach((entry, i) => {
@@ -123,9 +105,8 @@ function renderGrid(list) {
 /* ─── SEARCH ─── */
 searchInput.addEventListener('input', () => {
   const q = searchInput.value.trim().toLowerCase();
-  const langEntries = getLangEntries();
   if (!q) { renderGrid(); return; }
-  renderGrid(langEntries.filter(e =>
+  renderGrid(entries.filter(e =>
     e.title.toLowerCase().includes(q) ||
     (e.artist && e.artist.toLowerCase().includes(q)) ||
     (e.lyrics && e.lyrics.toLowerCase().includes(q))
@@ -197,15 +178,14 @@ $('saveEntryBtn').addEventListener('click', () => {
     if (idx !== -1) { entries[idx] = { ...entries[idx], title, artist, date, lyrics, updatedAt: Date.now() }; }
     showToast('更新しました');
   } else {
-    entries.unshift({ id: uid(), title, artist, date, lyrics, lang: currentLang(), createdAt: Date.now(), updatedAt: Date.now() });
+    entries.unshift({ id: uid(), title, artist, date, lyrics, createdAt: Date.now(), updatedAt: Date.now() });
     showToast('追加しました');
   }
 
   saveEntries(entries);
   closeFormSheet();
   const q = searchInput.value.trim().toLowerCase();
-  const langEntries = getLangEntries();
-  renderGrid(q ? langEntries.filter(e =>
+  renderGrid(q ? entries.filter(e =>
     e.title.toLowerCase().includes(q) ||
     (e.artist && e.artist.toLowerCase().includes(q)) ||
     (e.lyrics && e.lyrics.toLowerCase().includes(q))
