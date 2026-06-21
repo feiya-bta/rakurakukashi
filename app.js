@@ -52,6 +52,13 @@ const fmtDate   = (iso) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString(
 /* ─── ESCAPE ─── */
 const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
+/* ─── FONT DETECTION ───
+   Zen Maru Gothic doesn't include Vietnamese tone-mark glyphs (ư, ờ, ặ, etc.),
+   so the browser falls back to a different font mid-word. Detect that content
+   and render it in Space Mono instead, which supports those characters cleanly. */
+const hasVietnamese = (s) => /[\u00C0-\u02AF\u1E00-\u1EFF]/.test(s || '');
+const fontClass = (s) => hasVietnamese(s) ? ' font-mono' : '';
+
 /* ─── RENDER ─── */
 function renderGrid(list) {
   lyricGrid.querySelectorAll('.lyric-card').forEach(el => el.remove());
@@ -71,9 +78,9 @@ function renderGrid(list) {
       <div class="card-spine"></div>
       <div class="card-ruled"></div>
       <div class="card-inner">
-        <p class="card-title">${esc(entry.title)}</p>
-        ${entry.artist ? `<p class="card-artist">${esc(entry.artist)}</p>` : ''}
-        ${preview ? `<p class="card-preview">${esc(preview)}</p>` : ''}
+        <p class="card-title${fontClass(entry.title)}">${esc(entry.title)}</p>
+        ${entry.artist ? `<p class="card-artist${fontClass(entry.artist)}">${esc(entry.artist)}</p>` : ''}
+        ${preview ? `<p class="card-preview${fontClass(preview)}">${esc(preview)}</p>` : ''}
         ${entry.date ? `<p class="card-date">${fmtDate(entry.date)}</p>` : ''}
       </div>
       <div class="card-actions">
@@ -207,12 +214,27 @@ function openViewSheet(id) {
   const e = entries.find(x => x.id === id);
   if (!e) return;
   viewingId = id;
-  $('viewTitle').textContent = e.title;
-  const parts = [];
-  if (e.artist) parts.push(e.artist);
-  if (e.date)   parts.push(fmtDate(e.date));
-  $('viewMeta').textContent = parts.join(' · ');
-  $('viewLyrics').textContent = e.lyrics || '';
+
+  const titleEl = $('viewTitle');
+  titleEl.textContent = e.title;
+  titleEl.classList.toggle('font-mono', hasVietnamese(e.title));
+
+  const metaEl = $('viewMeta');
+  metaEl.innerHTML = '';
+  if (e.artist) {
+    const artistSpan = document.createElement('span');
+    artistSpan.textContent = e.artist;
+    artistSpan.classList.toggle('font-mono', hasVietnamese(e.artist));
+    metaEl.appendChild(artistSpan);
+  }
+  if (e.date) {
+    if (e.artist) metaEl.appendChild(document.createTextNode(' · '));
+    metaEl.appendChild(document.createTextNode(fmtDate(e.date)));
+  }
+
+  const lyricsEl = $('viewLyrics');
+  lyricsEl.textContent = e.lyrics || '';
+  lyricsEl.classList.toggle('font-mono', hasVietnamese(e.lyrics || ''));
   openSheet(viewModal);
 }
 
