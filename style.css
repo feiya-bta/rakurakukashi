@@ -496,6 +496,11 @@ body {
 }
 .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ─── VIETNAMESE TEXT OVERRIDE ───
+   Zen Maru Gothic lacks Vietnamese tone-mark glyphs, so detected
+   Vietnamese content is switched to Space Mono for clean rendering. */
+.font-mono { font-family: var(--font-mono) !important; }
+
 /* ─── ANIMATIONS ─── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }
