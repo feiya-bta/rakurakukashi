@@ -57,16 +57,17 @@
   --ruled:       rgba(255,255,255,0.04);
 }
 
-[data-lang="vi"] { --font-f: var(--font-vi); }
-[data-lang="zh"] { --font-f: var(--font-zh); }
-[data-lang="ja"] { --font-f: var(--font-ja); }
+/* Content font: selected lang font first, Zen Maru always as CJK fallback */
+[data-lang="vi"] { --font-f: 'Space Mono', 'Zen Maru Gothic', sans-serif; }
+[data-lang="zh"] { --font-f: 'Noto Sans SC', 'Zen Maru Gothic', sans-serif; }
+[data-lang="ja"] { --font-f: 'Zen Maru Gothic', sans-serif; }
 
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
 body {
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   background: var(--bg);
   color: var(--text);
   min-height: 100dvh;
@@ -189,7 +190,7 @@ body {
 .search-bar input {
   flex: 1; background: none; border: none; outline: none;
   font-size: 15px; color: var(--text);
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
 }
 .search-bar input::placeholder { color: var(--text-3); }
 .entry-count {
@@ -266,13 +267,13 @@ body {
 .card-title {
   font-size: 15px; font-weight: 700;
   line-height: 1.35;
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .card-artist {
   font-size: 12px; color: var(--accent); font-weight: 500;
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
@@ -424,13 +425,16 @@ body {
   padding: 12px 14px;
   font-size: 15px;
   color: var(--text);
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   outline: none;
   transition: border-color var(--ease), box-shadow var(--ease);
   resize: none;
   appearance: none;
   -webkit-appearance: none;
 }
+
+/* Only the lyrics textarea uses the selected language font */
+.field-textarea { font-family: var(--font-f); }
 .field-input:focus,
 .field-textarea:focus {
   border-color: var(--accent);
@@ -449,7 +453,7 @@ body {
 .view-header-info { flex: 1; min-width: 0; }
 .view-title {
   font-size: 18px; font-weight: 700;
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   line-height: 1.3;
   word-break: break-word;
 }
@@ -488,7 +492,7 @@ body {
   padding: 13px 20px;
   border-radius: var(--r-btn);
   font-size: 15px; font-weight: 600;
-  font-family: var(--font-f);
+  font-family: var(--font-ja);
   cursor: pointer;
   transition: opacity var(--ease), transform var(--ease);
   border: none; white-space: nowrap;
