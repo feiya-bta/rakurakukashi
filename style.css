@@ -37,6 +37,7 @@
   --r-btn:   12px;
   --ease:    0.22s cubic-bezier(0.4,0,0.2,1);
   --hdr-h:   60px;
+  --tab-h:   58px;
   --safe-b:  env(safe-area-inset-bottom, 0px);
 }
 
@@ -67,6 +68,7 @@ body {
   overscroll-behavior: none;
   transition: background var(--ease), color var(--ease);
   -webkit-font-smoothing: antialiased;
+  padding-bottom: calc(var(--tab-h) + var(--safe-b));
 }
 
 /* ─── HEADER ─── */
@@ -129,7 +131,6 @@ body {
 }
 .icon-btn svg { width: 18px; height: 18px; }
 .icon-btn:active { opacity: 0.7; transform: scale(0.93); }
-.icon-btn--danger:active,
 .icon-btn--danger { color: var(--text-2); }
 .icon-btn--danger:hover,
 .icon-btn--danger:focus { color: #e53535; border-color: #e53535; }
@@ -138,6 +139,55 @@ body {
 .ico-moon { display: none; }
 [data-theme="dark"] .ico-sun  { display: none; }
 [data-theme="dark"] .ico-moon { display: block; }
+
+/* ─── TAB BAR ─── */
+.tab-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 85;
+  height: calc(var(--tab-h) + var(--safe-b));
+  padding-bottom: var(--safe-b);
+  background: var(--hdr);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: stretch;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-3);
+  font-family: var(--font-ja);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  transition: color var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  padding-top: 6px;
+}
+
+.tab-item svg {
+  width: 22px; height: 22px;
+  stroke-width: 1.5;
+  transition: stroke var(--ease);
+}
+
+.tab-item.active {
+  color: var(--accent);
+}
+
+.tab-item:active {
+  opacity: 0.6;
+}
 
 /* ─── SEARCH ─── */
 .search-wrap { padding: 12px 16px 6px; }
@@ -175,7 +225,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px 16px 120px;
+  padding: 10px 16px 90px;
 }
 
 /* ─── EMPTY STATE ─── */
@@ -208,7 +258,6 @@ body {
 
 .lyric-card:active { transform: scale(0.985); }
 
-/* ruled lines */
 .card-ruled {
   position: absolute; inset: 0; pointer-events: none;
   background-image: repeating-linear-gradient(
@@ -217,7 +266,6 @@ body {
   );
 }
 
-/* spine */
 .card-spine {
   width: 4px; flex-shrink: 0;
   border-radius: var(--r-card) 0 0 var(--r-card);
@@ -265,7 +313,7 @@ body {
   margin-top: 6px;
 }
 
-/* ─── CARD RIGHT ACTIONS (always visible on mobile) ─── */
+/* ─── CARD ACTIONS ─── */
 .card-actions {
   display: flex; flex-direction: column;
   justify-content: center; align-items: center;
@@ -291,11 +339,11 @@ body {
 /* ─── FAB ─── */
 .fab {
   position: fixed;
-  bottom: calc(24px + var(--safe-b));
+  bottom: calc(var(--tab-h) + var(--safe-b) + 16px);
   right: 20px;
   z-index: 80;
-  width: 56px; height: 56px;
-  border-radius: 18px;
+  width: 52px; height: 52px;
+  border-radius: 16px;
   background: var(--accent);
   color: #fff; border: none;
   cursor: pointer;
@@ -337,7 +385,7 @@ body {
   transform: translateY(0);
 }
 
-.bottom-sheet--view  { max-height: 94dvh; }
+.bottom-sheet--view    { max-height: 94dvh; }
 .bottom-sheet--confirm { max-height: 60dvh; }
 
 .sheet-handle {
@@ -480,10 +528,149 @@ body {
 .btn--danger  { background: #e53535; color: #fff; }
 .btn--full    { width: 100%; text-align: center; }
 
+/* ─── DATA TAB VIEW ─── */
+.data-view {
+  padding: 20px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.data-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.data-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-family: var(--font-ja);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Stats */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--text-2);
+  font-family: var(--font-ja);
+}
+.stat-val {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+/* Data action rows */
+.data-action-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.data-action-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--font-ja);
+}
+
+.data-action-desc {
+  font-size: 12px;
+  color: var(--text-3);
+  font-family: var(--font-ja);
+  line-height: 1.6;
+}
+
+.data-action-btn {
+  margin-top: 4px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-ja);
+  cursor: pointer;
+  border: none;
+  transition: opacity var(--ease), transform var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  align-self: flex-start;
+}
+
+.data-action-btn:active {
+  opacity: 0.7;
+  transform: scale(0.96);
+}
+
+.data-action-btn--export {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.data-action-btn--import {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.data-action-btn--danger {
+  background: color-mix(in srgb, #e53535 10%, transparent);
+  color: #e53535;
+  border: 1px solid color-mix(in srgb, #e53535 25%, transparent);
+}
+
+/* CSV format note */
+.csv-note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.csv-note-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  font-family: var(--font-ja);
+}
+
+.csv-note-code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 8px 10px;
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
 /* ─── TOAST ─── */
 .toast {
   position: fixed;
-  bottom: calc(90px + var(--safe-b));
+  bottom: calc(var(--tab-h) + var(--safe-b) + 16px);
   left: 50%; transform: translateX(-50%) translateY(12px);
   background: var(--text); color: var(--bg);
   padding: 10px 22px;
@@ -496,9 +683,7 @@ body {
 }
 .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ─── VIETNAMESE TEXT OVERRIDE ───
-   Zen Maru Gothic lacks Vietnamese tone-mark glyphs, so detected
-   Vietnamese content is switched to Space Mono for clean rendering. */
+/* ─── VIETNAMESE TEXT OVERRIDE ─── */
 .font-mono { font-family: var(--font-mono) !important; }
 
 /* ─── ANIMATIONS ─── */
@@ -511,11 +696,11 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── WIDER SCREENS — optional 2-col ─── */
+/* ─── WIDER SCREENS ─── */
 @media (min-width: 640px) {
   body { max-width: 480px; margin: 0 auto; }
   .fab { right: calc(50% - 240px + 20px); }
-  .toast { bottom: 100px; }
+  .tab-bar { max-width: 480px; left: 50%; transform: translateX(-50%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
