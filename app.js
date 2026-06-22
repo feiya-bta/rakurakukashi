@@ -1,287 +1,256 @@
-/* =============================================
-   詩集 · app.js
-   ============================================= */
-'use strict';
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>らくらく歌詞</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
 
-const STORAGE_KEY = 'shishu_lyricbook_v1';
-const THEME_KEY   = 'shishu_theme';
-
-/* ─── STORAGE ─── */
-const loadEntries = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } };
-const saveEntries = (e) => localStorage.setItem(STORAGE_KEY, JSON.stringify(e));
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-
-/* ─── STATE ─── */
-let entries       = loadEntries();
-let editingId     = null;
-let viewingId     = null;
-let pendingDelId  = null;
-
-/* ─── REFS ─── */
-const $ = (id) => document.getElementById(id);
-const html         = document.documentElement;
-const lyricGrid    = $('lyricGrid');
-const emptyState   = $('emptyState');
-const entryCountEl = $('entryCount');
-const searchInput  = $('searchInput');
-
-const formModal    = $('formModal');
-const viewModal    = $('viewModal');
-const confirmModal = $('confirmModal');
-
-/* ─── THEME ─── */
-const applyTheme = (t) => { html.setAttribute('data-theme', t); localStorage.setItem(THEME_KEY, t); };
-applyTheme(localStorage.getItem(THEME_KEY) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-document.querySelector('.theme-toggle').addEventListener('click', () =>
-  applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
-
-/* ─── TOAST ─── */
-const toast = $('toast');
-let toastT;
-const showToast = (msg) => {
-  toast.textContent = msg;
-  toast.classList.add('visible');
-  clearTimeout(toastT);
-  toastT = setTimeout(() => toast.classList.remove('visible'), 2200);
-};
-
-/* ─── DATE ─── */
-const todayISO  = () => new Date().toISOString().slice(0, 10);
-const fmtDate   = (iso) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' }) : '';
-
-/* ─── ESCAPE ─── */
-const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
-/* ─── FONT DETECTION ───
-   Zen Maru Gothic doesn't include Vietnamese tone-mark glyphs (ư, ờ, ặ, etc.),
-   so the browser falls back to a different font mid-word. Detect that content
-   and render it in Space Mono instead, which supports those characters cleanly. */
-const hasVietnamese = (s) => /[\u00C0-\u02AF\u1E00-\u1EFF]/.test(s || '');
-const fontClass = (s) => hasVietnamese(s) ? ' font-mono' : '';
-
-/* ─── RENDER ─── */
-function renderGrid(list) {
-  lyricGrid.querySelectorAll('.lyric-card').forEach(el => el.remove());
-  const show = list ?? entries;
-  entryCountEl.textContent = `${entries.length} 曲`;
-  emptyState.style.display = show.length === 0 ? 'flex' : 'none';
-
-  [...show].sort((a, b) => b.createdAt - a.createdAt).forEach((entry, i) => {
-    const card = document.createElement('article');
-    card.className = 'lyric-card';
-    card.dataset.id = entry.id;
-    card.style.animationDelay = `${i * 35}ms`;
-
-    const preview = (entry.lyrics || '').trim().slice(0, 120);
-
-    card.innerHTML = `
-      <div class="card-spine"></div>
-      <div class="card-ruled"></div>
-      <div class="card-inner">
-        <p class="card-title${fontClass(entry.title)}">${esc(entry.title)}</p>
-        ${entry.artist ? `<p class="card-artist${fontClass(entry.artist)}">${esc(entry.artist)}</p>` : ''}
-        ${preview ? `<p class="card-preview${fontClass(preview)}">${esc(preview)}</p>` : ''}
-        ${entry.date ? `<p class="card-date">${fmtDate(entry.date)}</p>` : ''}
+  <!-- ─── HEADER ─── -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-mark">❤︎</div>
+      <div class="header-titles">
+        <h1 class="app-title">らくらく歌詞</h1>
+        <p class="app-subtitle">歌詞の本</p>
       </div>
-      <div class="card-actions">
-        <button class="card-act" data-action="edit" aria-label="編集">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 3l3 3L7 16H4v-3L14 3z"/>
+    </div>
+    <nav class="header-controls">
+      <button class="icon-btn theme-toggle" aria-label="テーマ切替">
+        <svg class="ico ico-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="10" cy="10" r="3.5"/>
+          <line x1="10" y1="1.5" x2="10" y2="3.5"/>
+          <line x1="10" y1="16.5" x2="10" y2="18.5"/>
+          <line x1="1.5" y1="10" x2="3.5" y2="10"/>
+          <line x1="16.5" y1="10" x2="18.5" y2="10"/>
+          <line x1="3.9" y1="3.9" x2="5.3" y2="5.3"/>
+          <line x1="14.7" y1="14.7" x2="16.1" y2="16.1"/>
+          <line x1="3.9" y1="16.1" x2="5.3" y2="14.7"/>
+          <line x1="14.7" y1="5.3" x2="16.1" y2="3.9"/>
+        </svg>
+        <svg class="ico ico-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16.5 11.5A7 7 0 0 1 8.5 3.5a7 7 0 1 0 8 8z"/>
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ─── SONGS TAB VIEW ─── -->
+  <div id="songsView">
+    <div class="search-wrap">
+      <div class="search-bar">
+        <svg class="search-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="9" cy="9" r="5.5"/>
+          <line x1="13.5" y1="13.5" x2="17" y2="17"/>
+        </svg>
+        <input type="search" id="searchInput" placeholder="曲名・歌詞を検索…" autocomplete="off" />
+        <span class="entry-count" id="entryCount">0 曲</span>
+      </div>
+    </div>
+
+    <main class="lyric-list" id="lyricGrid">
+      <div class="empty-state" id="emptyState">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="empty-svg">
+          <rect x="8" y="6" width="32" height="36" rx="3"/>
+          <line x1="14" y1="16" x2="34" y2="16"/>
+          <line x1="14" y1="22" x2="34" y2="22"/>
+          <line x1="14" y1="28" x2="26" y2="28"/>
+        </svg>
+        <p class="empty-title">まだ歌詞がありません</p>
+        <p class="empty-sub">右下の ＋ から最初の一曲を追加しよう</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- ─── DATA TAB VIEW ─── -->
+  <div id="dataView" style="display:none">
+    <div class="data-view">
+
+      <!-- Stats -->
+      <div class="data-section">
+        <p class="data-section-title">概要</p>
+        <div id="dataStats">
+          <div class="stat-row">
+            <span class="stat-label">保存曲数</span>
+            <span class="stat-val">0 曲</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export -->
+      <div class="data-section">
+        <p class="data-section-title">エクスポート</p>
+        <div class="data-action-row">
+          <span class="data-action-label">CSVファイルとして書き出す</span>
+          <span class="data-action-desc">すべての歌詞データを .csv ファイルに書き出します。スプレッドシートアプリで開いたり、バックアップとして保存できます。</span>
+          <button class="data-action-btn data-action-btn--export" id="exportCsvBtn">ダウンロード</button>
+        </div>
+      </div>
+
+      <!-- Import -->
+      <div class="data-section">
+        <p class="data-section-title">インポート</p>
+        <div class="data-action-row">
+          <span class="data-action-label">CSVを追加読み込み</span>
+          <span class="data-action-desc">既存データを残したまま、CSVのデータを追加します。同じ ID の行はスキップされます。</span>
+          <button class="data-action-btn data-action-btn--import" id="importMergeBtn">CSVを選択</button>
+          <input type="file" id="importMergeInput" accept=".csv,text/csv" style="display:none" />
+        </div>
+        <div class="data-action-row">
+          <span class="data-action-label">CSVで全て置き換える</span>
+          <span class="data-action-desc">現在のデータをすべて削除し、CSVの内容に置き換えます。元に戻せません。</span>
+          <button class="data-action-btn data-action-btn--danger" id="importReplaceBtn">置き換えて読み込む</button>
+          <input type="file" id="importReplaceInput" accept=".csv,text/csv" style="display:none" />
+        </div>
+      </div>
+
+      <!-- CSV format reference -->
+      <div class="data-section">
+        <p class="data-section-title">CSVフォーマット</p>
+        <div class="csv-note">
+          <p class="csv-note-title">1行目はヘッダー行として認識されます</p>
+          <pre class="csv-note-code">id, title, artist, date, lyrics, createdAt, updatedAt</pre>
+          <p class="data-action-desc" style="margin-top:6px">
+            必須列は <strong>title</strong> のみです。<br>
+            歌詞など改行を含む列はダブルクォート（"）で囲んでください。<br>
+            エクスポートしたCSVをそのまま読み込めます。
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── FAB ─── -->
+  <button class="fab" id="openAddModal" aria-label="追加">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="10" y1="3" x2="10" y2="17"/>
+      <line x1="3" y1="10" x2="17" y2="10"/>
+    </svg>
+  </button>
+
+  <!-- ─── TAB BAR ─── -->
+  <nav class="tab-bar">
+    <button class="tab-item active" id="tabSongs" aria-label="曲一覧">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="3" width="16" height="18" rx="2"/>
+        <line x1="8" y1="9" x2="16" y2="9"/>
+        <line x1="8" y1="13" x2="16" y2="13"/>
+        <line x1="8" y1="17" x2="12" y2="17"/>
+      </svg>
+      曲一覧
+    </button>
+    <button class="tab-item" id="tabData" aria-label="データ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="12" cy="6" rx="8" ry="3"/>
+        <path d="M4 6v4c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/>
+        <path d="M4 10v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4"/>
+      </svg>
+      データ
+    </button>
+  </nav>
+
+  <!-- ─── FORM SHEET ─── -->
+  <div class="sheet-overlay" id="formModal" role="dialog" aria-modal="true">
+    <div class="bottom-sheet" id="formSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2 class="sheet-title" id="modalTitle">歌詞を追加</h2>
+        <button class="icon-btn sheet-close" id="closeFormModal" aria-label="閉じる">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <line x1="5" y1="5" x2="15" y2="15"/>
+            <line x1="15" y1="5" x2="5" y2="15"/>
           </svg>
         </button>
-        <button class="card-act danger" data-action="delete" aria-label="削除">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="5" x2="17" y2="5"/>
-            <path d="M8 5V3h4v2"/>
-            <path d="M5 5l1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/>
-          </svg>
-        </button>
-      </div>`;
+      </div>
+      <div class="sheet-body">
+        <input type="hidden" id="entryId" />
+        <div class="field-group">
+          <label class="field-label" for="entryTitle">曲名 <span class="req">*</span></label>
+          <input class="field-input" type="text" id="entryTitle" placeholder="例：さよなら" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="entryArtist">アーティスト</label>
+          <input class="field-input" type="text" id="entryArtist" placeholder="例：椎名林檎" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="entryDate">日付</label>
+          <input class="field-input" type="date" id="entryDate" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="entryLyrics">歌詞</label>
+          <textarea class="field-textarea" id="entryLyrics" placeholder="ここに歌詞を貼り付けてください…"></textarea>
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn btn--ghost" id="cancelFormBtn">キャンセル</button>
+        <button class="btn btn--primary" id="saveEntryBtn">保存する</button>
+      </div>
+    </div>
+  </div>
 
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.card-act')) return;
-      openViewSheet(entry.id);
-    });
-    card.querySelector('[data-action="edit"]').addEventListener('click', (e) => { e.stopPropagation(); openFormSheet('edit', entry.id); });
-    card.querySelector('[data-action="delete"]').addEventListener('click', (e) => { e.stopPropagation(); openConfirm(entry.id, entry.title); });
+  <!-- ─── VIEW SHEET ─── -->
+  <div class="sheet-overlay" id="viewModal" role="dialog" aria-modal="true">
+    <div class="bottom-sheet bottom-sheet--view" id="viewSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="view-header-info">
+          <h2 class="view-title" id="viewTitle"></h2>
+          <p class="view-meta" id="viewMeta"></p>
+        </div>
+        <div class="view-hdr-actions">
+          <button class="icon-btn" id="editFromView" aria-label="編集">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 3l3 3L7 16H4v-3L14 3z"/>
+            </svg>
+          </button>
+          <button class="icon-btn icon-btn--danger" id="deleteFromView" aria-label="削除">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="5" x2="17" y2="5"/>
+              <path d="M8 5V3h4v2"/>
+              <path d="M5 5l1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/>
+              <line x1="8" y1="9" x2="8" y2="14"/>
+              <line x1="12" y1="9" x2="12" y2="14"/>
+            </svg>
+          </button>
+          <button class="icon-btn sheet-close" id="closeViewModal" aria-label="閉じる">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <line x1="5" y1="5" x2="15" y2="15"/>
+              <line x1="15" y1="5" x2="5" y2="15"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="sheet-body">
+        <pre class="view-lyrics" id="viewLyrics"></pre>
+      </div>
+    </div>
+  </div>
 
-    lyricGrid.appendChild(card);
-  });
-}
+  <!-- ─── CONFIRM SHEET ─── -->
+  <div class="sheet-overlay" id="confirmModal" role="dialog" aria-modal="true">
+    <div class="bottom-sheet bottom-sheet--confirm">
+      <div class="sheet-handle"></div>
+      <div class="confirm-body">
+        <p class="confirm-title">確認</p>
+        <p class="confirm-sub" id="confirmSub"></p>
+        <button class="btn btn--danger btn--full" id="confirmDeleteBtn">実行する</button>
+        <button class="btn btn--ghost btn--full" id="cancelDeleteBtn">キャンセル</button>
+      </div>
+    </div>
+  </div>
 
-/* ─── SEARCH ─── */
-searchInput.addEventListener('input', () => {
-  const q = searchInput.value.trim().toLowerCase();
-  if (!q) { renderGrid(); return; }
-  renderGrid(entries.filter(e =>
-    e.title.toLowerCase().includes(q) ||
-    (e.artist && e.artist.toLowerCase().includes(q)) ||
-    (e.lyrics && e.lyrics.toLowerCase().includes(q))
-  ));
-});
+  <!-- ─── TOAST ─── -->
+  <div class="toast" id="toast"></div>
 
-/* ─── SHEET HELPERS ─── */
-const openSheet  = (el) => { el.classList.add('open'); document.body.style.overflow = 'hidden'; };
-const closeSheet = (el) => { el.classList.remove('open'); document.body.style.overflow = ''; };
-
-// Close sheet when tapping the dark backdrop (but not the sheet itself)
-[formModal, viewModal, confirmModal].forEach(overlay => {
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeSheet(overlay);
-  });
-});
-
-/* ─── FORM SHEET ─── */
-const fTitle  = $('entryTitle');
-const fArtist = $('entryArtist');
-const fDate   = $('entryDate');
-const fLyrics = $('entryLyrics');
-
-function openFormSheet(mode = 'add', id = null) {
-  editingId = id;
-  $('modalTitle').textContent = mode === 'edit' ? '歌詞を編集' : '歌詞を追加';
-
-  if (mode === 'edit' && id) {
-    const e = entries.find(x => x.id === id);
-    if (!e) return;
-    $('entryId').value = e.id;
-    fTitle.value  = e.title;
-    fArtist.value = e.artist  || '';
-    fDate.value   = e.date    || '';
-    fLyrics.value = e.lyrics  || '';
-  } else {
-    $('entryId').value = '';
-    fTitle.value  = '';
-    fArtist.value = '';
-    fDate.value   = todayISO();
-    fLyrics.value = '';
-  }
-  openSheet(formModal);
-  setTimeout(() => fTitle.focus(), 380);
-}
-
-const closeFormSheet = () => { closeSheet(formModal); editingId = null; };
-
-$('openAddModal').addEventListener('click',   () => openFormSheet('add'));
-$('closeFormModal').addEventListener('click', closeFormSheet);
-$('cancelFormBtn').addEventListener('click',  closeFormSheet);
-
-$('saveEntryBtn').addEventListener('click', () => {
-  const title  = fTitle.value.trim();
-  const artist = fArtist.value.trim();
-  const date   = fDate.value;
-  const lyrics = fLyrics.value;
-
-  if (!title) {
-    fTitle.focus();
-    fTitle.style.borderColor = 'var(--accent)';
-    setTimeout(() => fTitle.style.borderColor = '', 1200);
-    showToast('⚠ 曲名を入力してください');
-    return;
-  }
-
-  if (editingId) {
-    const idx = entries.findIndex(e => e.id === editingId);
-    if (idx !== -1) { entries[idx] = { ...entries[idx], title, artist, date, lyrics, updatedAt: Date.now() }; }
-    showToast('更新しました');
-  } else {
-    entries.unshift({ id: uid(), title, artist, date, lyrics, createdAt: Date.now(), updatedAt: Date.now() });
-    showToast('追加しました');
-  }
-
-  saveEntries(entries);
-  closeFormSheet();
-  const q = searchInput.value.trim().toLowerCase();
-  renderGrid(q ? entries.filter(e =>
-    e.title.toLowerCase().includes(q) ||
-    (e.artist && e.artist.toLowerCase().includes(q)) ||
-    (e.lyrics && e.lyrics.toLowerCase().includes(q))
-  ) : undefined);
-});
-
-/* Tab key inside textarea */
-fLyrics.addEventListener('keydown', (e) => {
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    const s = fLyrics.selectionStart;
-    fLyrics.value = fLyrics.value.slice(0, s) + '  ' + fLyrics.value.slice(fLyrics.selectionEnd);
-    fLyrics.selectionStart = fLyrics.selectionEnd = s + 2;
-  }
-});
-
-/* ─── VIEW SHEET ─── */
-function openViewSheet(id) {
-  const e = entries.find(x => x.id === id);
-  if (!e) return;
-  viewingId = id;
-
-  const titleEl = $('viewTitle');
-  titleEl.textContent = e.title;
-  titleEl.classList.toggle('font-mono', hasVietnamese(e.title));
-
-  const metaEl = $('viewMeta');
-  metaEl.innerHTML = '';
-  if (e.artist) {
-    const artistSpan = document.createElement('span');
-    artistSpan.textContent = e.artist;
-    artistSpan.classList.toggle('font-mono', hasVietnamese(e.artist));
-    metaEl.appendChild(artistSpan);
-  }
-  if (e.date) {
-    if (e.artist) metaEl.appendChild(document.createTextNode(' · '));
-    metaEl.appendChild(document.createTextNode(fmtDate(e.date)));
-  }
-
-  const lyricsEl = $('viewLyrics');
-  lyricsEl.textContent = e.lyrics || '';
-  lyricsEl.classList.toggle('font-mono', hasVietnamese(e.lyrics || ''));
-  openSheet(viewModal);
-}
-
-const closeViewSheet = () => { closeSheet(viewModal); viewingId = null; };
-
-$('closeViewModal').addEventListener('click', closeViewSheet);
-$('editFromView').addEventListener('click', () => {
-  const id = viewingId;
-  closeViewSheet();
-  openFormSheet('edit', id);
-});
-$('deleteFromView').addEventListener('click', () => {
-  const e = entries.find(x => x.id === viewingId);
-  closeViewSheet();
-  if (e) openConfirm(e.id, e.title);
-});
-
-/* ─── CONFIRM SHEET ─── */
-function openConfirm(id, title) {
-  pendingDelId = id;
-  $('confirmSub').textContent = `「${title}」を削除します。この操作は元に戻せません。`;
-  openSheet(confirmModal);
-}
-
-$('cancelDeleteBtn').addEventListener('click',  () => { closeSheet(confirmModal); pendingDelId = null; });
-$('confirmDeleteBtn').addEventListener('click', () => {
-  if (!pendingDelId) return;
-  entries = entries.filter(e => e.id !== pendingDelId);
-  saveEntries(entries);
-  closeSheet(confirmModal);
-  pendingDelId = null;
-  renderGrid();
-  showToast('削除しました');
-});
-
-/* ─── KEYBOARD ─── */
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    if (confirmModal.classList.contains('open')) { closeSheet(confirmModal); pendingDelId = null; }
-    else if (formModal.classList.contains('open')) closeFormSheet();
-    else if (viewModal.classList.contains('open')) closeViewSheet();
-  }
-  if ((e.metaKey || e.ctrlKey) && e.key === 'n') { e.preventDefault(); openFormSheet('add'); }
-  if ((e.metaKey || e.ctrlKey) && e.key === 's' && formModal.classList.contains('open')) {
-    e.preventDefault(); $('saveEntryBtn').click();
-  }
-});
-
-/* ─── INIT ─── */
-renderGrid();
+  <script src="./app.js"></script>
+</body>
+</html>
